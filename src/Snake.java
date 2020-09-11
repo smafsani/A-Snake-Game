@@ -28,7 +28,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public int H=600;
 	public Image tp,bg,head,body,fpg;
 	Timer t;
-	public int speed = 120;
+	public int speed=150;
 	public int HighScore=0;
 	public int Score=0;
 	public boolean FrontPage=true;
@@ -38,8 +38,8 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public boolean up=false;
 	public int count=0;
 	public int size=3;
-	public int xlength[]=new int[1000];
-	public int ylength[]=new int[1000];
+	public int x[]=new int[1000];
+	public int y[]=new int[1000];
 	public boolean gameover=false;
 	public Button easy,medium,hard;
 	public SnakeWorkSpace()
@@ -73,10 +73,10 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	{
 		if(count==0)
 		{
-			xlength[0]=60;
-			xlength[1]=xlength[0]-20;
-			xlength[2]=xlength[1]-20;
-			ylength[2]=ylength[1]=ylength[0]=100;
+			x[0]=45;
+			x[1]=x[0]-15;
+			x[2]=x[1]-15;
+			y[2]=y[1]=y[0]=100;
 		}
 		if(FrontPage) 
 		{
@@ -106,33 +106,74 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 			g.drawString("High Score: "+HighScore, 10, 20);
 			g.drawString("Score: "+Score, 10, 40);
 			
-			ImageIcon h=new ImageIcon(getClass().getResource("/image/RightHead20.png"));
-			ImageIcon b=new ImageIcon(getClass().getResource("/image/Body20.png"));
-			head=h.getImage();
+			ImageIcon rh=new ImageIcon(getClass().getResource("/image/RightHead15.png"));
+			ImageIcon lh=new ImageIcon(getClass().getResource("/image/LeftHead15.png"));
+			ImageIcon uh=new ImageIcon(getClass().getResource("/image/UpHead15.png"));
+			ImageIcon dh=new ImageIcon(getClass().getResource("/image/DownHead15.png"));
+			ImageIcon b=new ImageIcon(getClass().getResource("/image/Body15.png"));
 			body=b.getImage();
 			for(int j=0;j<size;j++)
 			{
 				if(j==0 && right)
 				{
-					g.drawImage(head, xlength[j], ylength[j], this);
+					head=rh.getImage();
+					g.drawImage(head, x[j], y[j], this);
+				}
+				if(j==0 && left)
+				{
+					head=lh.getImage();
+					g.drawImage(head, x[j], y[j], this);
+				}
+				if(j==0 && up)
+				{
+					head=uh.getImage();
+					g.drawImage(head, x[j], y[j], this);
+				}
+				if(j==0 && down)
+				{
+					head=dh.getImage();
+					g.drawImage(head, x[j], y[j], this);
 				}
 				if(j!=0)
 				{
-					g.drawImage(body, xlength[j], ylength[j], this);
+					g.drawImage(body, x[j], y[j], this);
 				}
 			}
 		}
 	}
 	@Override
 	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
 		// TODO Auto-generated method stub
-		
+		int key=e.getKeyCode();
+		if(key==KeyEvent.VK_RIGHT && !left && !FrontPage)
+		{
+			count+=1;
+			right=true;
+			up=down=false;
+		}
+		if(key==KeyEvent.VK_LEFT && !right && !FrontPage)
+		{
+			count+=1;
+			left=true;
+			up=down=false;
+		}
+		if(key==KeyEvent.VK_UP && !down && !FrontPage)
+		{
+			count+=1;
+			up=true;
+			right=left=false;
+		}
+		if(key==KeyEvent.VK_DOWN && !up && !FrontPage)
+		{
+			count+=1;
+			down=true;
+			right=left=false;
+		}
 	}
 
 	@Override
@@ -141,10 +182,73 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		
 	}
 
-	@Override
+	@Override	
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		
+		t.start();
+		if(!FrontPage && right) {
+			for(int k=size-1;k>=0;k--)
+			{
+				y[k+1]=y[k];
+			}
+			for(int k=size;k>=0;k--)
+			{
+				if(k==0)
+					x[k]+=15;
+				else
+					x[k]=x[k-1];
+				if(x[k]>W)
+					x[k]=15;
+			}
+			repaint();
+		}
+		if(!FrontPage && left) {
+			for(int k=size-1;k>=0;k--)
+			{
+				y[k+1]=y[k];
+			}
+			for(int k=size;k>=0;k--)
+			{
+				if(k==0)
+					x[k]-=15;
+				else
+					x[k]=x[k-1];
+				if(x[k]<15)
+					x[k]=W-5;
+			}
+			repaint();
+		}
+		if(!FrontPage && down) {
+			for(int k=size-1;k>=0;k--)
+			{
+				x[k+1]=x[k];
+			}
+			for(int k=size;k>=0;k--)
+			{
+				if(k==0)
+					y[k]+=15;
+				else
+					y[k]=y[k-1];
+				if(y[k]>H+45)
+					y[k]=55;
+			}
+			repaint();
+		}
+		if(!FrontPage && up) {
+			for(int k=size-1;k>=0;k--)
+			{
+				x[k+1]=x[k];
+			}
+			for(int k=size;k>=0;k--)
+			{
+				if(k==0)
+					y[k]-=15;
+				else
+					y[k]=y[k-1];
+				if(y[k]<45)
+					y[k]=H+40;
+			}
+			repaint();
+		}
 	}
-	
 }
