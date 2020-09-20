@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Random;
+
 import javax.swing.*;
 import java.awt.Button;
 public class Snake
@@ -14,21 +16,22 @@ public class Snake
 	{
 		JFrame frame=new JFrame("Snake");
 		SnakeWorkSpace ob=new SnakeWorkSpace();
-		frame.setBounds(250,20,690,700);
+		frame.setBounds(250,20,680,700);
 		frame.setBackground(Color.green);
 		frame.setVisible(true);
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(ob);
+		ob.setLayout(null);
 	}
 }
 class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 {
 	public int W=650;
 	public int H=600;
-	public Image tp,bg,head,body,fpg;
+	public Image tp,bg,head,body,fpg,apple;
 	Timer t;
-	public int speed=150;
+	public int speed=120;
 	public int HighScore=0;
 	public int Score=0;
 	public boolean FrontPage=true;
@@ -42,6 +45,12 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public int y[]=new int[1000];
 	public boolean gameover=false;
 	public Button easy,medium,hard;
+	public Random rand=new Random();
+	public int[] xLengthOfApple=new int[1000];
+	public int[] yLengthOfApple=new int[1000];
+	public int posx=rand.nextInt(43);
+	public int posy=rand.nextInt(40);
+	public int q,r;
 	public SnakeWorkSpace()
 	{
 		addKeyListener(this);
@@ -52,7 +61,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		t.start();	
 		
 		//Start Button for starting the GamePlay as well as
-		Button strt = new Button("Start");
+		final Button strt = new Button("Start");
 		strt.setBounds(300, 435, 70, 22);
 		strt.setFont(new Font("Tahoma",Font.BOLD,14));
 		strt.setBackground(new Color(102,0,102));
@@ -73,10 +82,26 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	{
 		if(count==0)
 		{
+			Score=0;
 			x[0]=45;
 			x[1]=x[0]-15;
 			x[2]=x[1]-15;
 			y[2]=y[1]=y[0]=100;
+			
+			q=1;
+			r=1;
+			xLengthOfApple[0]=15;
+			yLengthOfApple[0]=55;
+			while(q<=43)
+			{
+				xLengthOfApple[q]=xLengthOfApple[q-1]+15;
+				q++;
+			}
+			while(r<=40)
+			{
+				yLengthOfApple[r]=yLengthOfApple[r-1]+15;
+				r++;
+			}
 		}
 		if(FrontPage) 
 		{
@@ -111,6 +136,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 			ImageIcon uh=new ImageIcon(getClass().getResource("/image/UpHead15.png"));
 			ImageIcon dh=new ImageIcon(getClass().getResource("/image/DownHead15.png"));
 			ImageIcon b=new ImageIcon(getClass().getResource("/image/Body15.png"));
+			ImageIcon ap=new ImageIcon(getClass().getResource("/image/apple.png"));
 			body=b.getImage();
 			for(int j=0;j<size;j++)
 			{
@@ -139,8 +165,29 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 					g.drawImage(body, x[j], y[j], this);
 				}
 			}
+			apple=ap.getImage();
+			if(xLengthOfApple[posx]==x[0] && yLengthOfApple[posy]==y[0])
+			{
+				size++;
+				Score++;
+				locationOfNewApple();
+			}
+			g.drawImage(apple, xLengthOfApple[posx], yLengthOfApple[posy], this);
+			
+		}
+		
+	}
+	
+	public void locationOfNewApple()
+	{
+		posx=rand.nextInt(43);
+		posy=rand.nextInt(40);
+		if(xLengthOfApple[posx]==x[posx] && yLengthOfApple[posy]==y[posy])
+		{
+			locationOfNewApple();
 		}
 	}
+	
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub	
