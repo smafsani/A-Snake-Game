@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -23,6 +25,7 @@ public class Snake
 	public static Panel panel;
 	public static void main(String args[])
 	{
+		String siz,pos,applePos;
 		frame=new JFrame("Snake");
 		SnakeWorkSpace ob=new SnakeWorkSpace();
 		frame.setBounds(250,20,690,700);
@@ -32,8 +35,46 @@ public class Snake
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(ob);
 		ob.setLayout(null);
+		frame.addWindowListener(new WindowListener() {
+
+			@Override
+			public void windowOpened(WindowEvent e) {
+				// TODO Auto-generated method stub	
+			}
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// TODO Auto-generated method stub
+				ob.StoreCurrentInfo();
+			}
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			@Override
+			public void windowIconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			@Override
+			public void windowActivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 		
-		
+	
 		
 		panel = new Panel();
 		panel.setBounds(1, 325, 260, 335);
@@ -63,12 +104,6 @@ public class Snake
 		}
 		catch(Exception exc){}
 	}
-	/*public Snake()
-	{
-		panel.setVisible(false);
-	}*/
-	
-	
 }
 class appleLoc
 {
@@ -81,6 +116,7 @@ class appleLoc
 }
 class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 {
+	
 	public int W=650;
 	public int H=600;
 	public Image tp,bg,head,body,fpg,apple;
@@ -90,7 +126,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public int HighScore;
 	public int Score=0;
 	public boolean FrontPage=true;
-	public boolean right=true;
+	public boolean right=false;
 	public boolean down=false;
 	public boolean left=false;
 	public boolean up=false;
@@ -102,19 +138,21 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public Button easy,medium,hard,level,Quit;
 	public Random rand=new Random();
 	public int totalLoc=1720;
-	public int Position= rand.nextInt(totalLoc);
+	public int Position;
 	public int q,r,sco=0;
 	public Panel panel,panel2;
 	public Button save,sc,restartbtn,menu,back,cont,strt,scrbd;
-	public boolean Esy=true;
-	public boolean Mdum=false;
-	public boolean Hrd=false;
+	public boolean Esy;
+	public boolean Mdum;
+	public boolean Hrd;
 	public appleLoc[] Loc;
 	String lv="Easy";
 	public String s;
+	public boolean now=true;
 	public boolean scoreboard=false;
 	public boolean zx=true;
 	public Button done;
+	public int flag;
 	public SnakeWorkSpace()
 	{
 		addKeyListener(this);
@@ -122,11 +160,33 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		setFocusTraversalKeysEnabled(false);
 		setLayout(null);
 		
+		try
+		{
+			BufferedReader ne=new BufferedReader(new FileReader("Direction.txt"));
+			int k1=Integer.parseInt(ne.readLine());
+			int k2=Integer.parseInt(ne.readLine());
+			if(k2==1) {
+				Esy=true;
+				Mdum=Hrd=false;
+			}
+			if(k2==2) {
+				Mdum=true;
+				Esy=Hrd=false;
+			}
+			if(k2==3)
+			{
+				Hrd=true;
+				Esy=Mdum=false;
+			}
+		}catch(Exception e) {}
+		
 		t=new Timer(speed,this);
 		t.setDelay(speed);
 		t.start();
 		//run(speed);
 		setHighScore();
+		
+		
 		
 		//Start Button for starting the GamePlay as well as
 		strt = new Button("New Game");
@@ -138,6 +198,9 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		strt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+				right=true;
+				left=up=down=false;
+				Position=rand.nextInt(totalLoc);
 				cont.setEnabled(true);
 				panel2.setVisible(false);
 				FrontPage=false;
@@ -145,24 +208,103 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 				count=0;
 				setHighScore();
 				repaint();
+				
 			}
 		});
 		add(strt);
-		
+		try
+		{
+			BufferedReader ne=new BufferedReader(new FileReader("Available.txt"));
+			flag=Integer.parseInt(ne.readLine());
+		}catch(Exception e) {}
 		cont = new Button("Continue");
 		cont.setBounds(275, 366, 140, 40);
 		cont.setFont(new Font("Tahoma",Font.BOLD,16));
 		cont.setBackground(new Color(102,0,102));
 		cont.setForeground(Color.WHITE);
 		cont.setVisible(true);
-		cont.setEnabled(false);
+		/*if(flag==1)
+			cont.setEnabled(false);
+		else if(flag==0)
+			cont.setEnabled(true);*/
+		cont.setFocusable(false);
 		cont.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				panel2.setVisible(false);
-				right=true;
-				FrontPage=false;
-				repaint();
+				int c,l;
+				if(now && flag==0)
+				{
+					try{
+						BufferedReader collect=new BufferedReader(new FileReader("Store.txt"));
+						BufferedReader collect2=new BufferedReader(new FileReader("Direction.txt"));
+						Position=Integer.parseInt(collect.readLine());
+						size=Integer.parseInt(collect.readLine());
+						for(int j=0;j<size;j++)
+						{
+							x[j]=Integer.parseInt(collect.readLine());
+						}
+						for(int j=0;j<size;j++)
+						{
+							y[j]=Integer.parseInt(collect.readLine());
+						}
+						collect.close();
+						c=Integer.parseInt(collect2.readLine());
+						if(c==1)
+						{
+							right=true;
+							left=up=down=false;
+						}
+						if(c==2)
+						{
+							left=true;
+							right=up=down=false;
+						}
+						if(c==3)
+						{
+							up=true;
+							left=right=down=false;
+						}
+						if(c==4)
+						{
+							down=true;
+							left=up=right=false;
+						}
+						l=Integer.parseInt(collect2.readLine());
+						if(l==1)
+						{
+							Esy=true;
+							Mdum=Hrd=false;
+							speed=90;
+							t.setDelay(speed);
+						}
+						if(l==2)
+						{
+							Mdum=true;
+							Esy=Hrd=false;
+							speed=80;
+							t.setDelay(speed);
+						}
+						if(l==3)
+						{
+							Hrd=true;
+							Mdum=Esy=false;
+							speed=70;
+							t.setDelay(speed);
+						}
+						collect2.close();
+					}catch(Exception ex) {}
+					count=1;
+					t.stop();
+					Score=size-3;
+					repaint();
+					now=false;
+				}
+				else {
+					panel2.setVisible(false);
+					FrontPage=false;
+					repaint();
+				}
+				setHighScore();
 			}
 		});
 		add(cont);
@@ -432,6 +574,65 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 			}
 		});
 		add(Quit);
+	}
+	public void StoreCurrentInfo()
+	{
+		if(!gameover) {
+		try
+		{
+			BufferedWriter w=new BufferedWriter(new FileWriter("Store.txt"));
+			BufferedWriter w2=new BufferedWriter(new FileWriter("Direction.txt"));
+			BufferedWriter w3=new BufferedWriter(new FileWriter("Available.txt"));
+			w.write(Integer.toString(Position));
+			w.newLine();
+			w.write(Integer.toString(size));
+			w.newLine();
+			for(int i=0;i<size;i++)
+			{
+				w.write(Integer.toString(x[i]));
+				w.newLine();
+			}
+			for(int i=0;i<size;i++)
+			{
+				w.write(Integer.toString(y[i]));
+				w.newLine();
+			}
+			w.close();
+			if(right)
+				w2.write(Integer.toString(1));
+			if(left)
+				w2.write(Integer.toString(2));
+			if(up)
+				w2.write(Integer.toString(3));
+			if(down)
+				w2.write(Integer.toString(4));
+			w2.newLine();
+			if(Esy)
+			{
+				w2.write(Integer.toString(1));
+			}
+			if(Mdum)
+			{
+				w2.write(Integer.toString(2));
+			}
+			if(Hrd)
+			{
+				w2.write(Integer.toString(3));
+			}
+			w2.close();
+			w3.write(Integer.toString(0));
+			w3.close();
+		}catch(Exception e) {}
+		}
+		else
+		{
+			try
+			{
+				BufferedWriter wx=new BufferedWriter(new FileWriter("Available.txt"));
+				wx.write(Integer.toString(1));
+				wx.close();
+			}catch(Exception e) {}
+		}
 	}
 	public SnakeWorkSpace(boolean scoreboard)
 	{
