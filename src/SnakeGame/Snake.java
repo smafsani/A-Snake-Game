@@ -74,7 +74,6 @@ public class Snake
 			
 		});
 		
-	
 		
 		panel = new Panel();
 		panel.setBounds(1, 325, 260, 335);
@@ -141,7 +140,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public int Position;
 	public int q,r,sco=0;
 	public Panel panel,panel2;
-	public Button save,sc,restartbtn,menu,back,cont,strt,scrbd;
+	public static Button save,sc,restartbtn,menu,back,cont,strt,scrbd;
 	public boolean Esy;
 	public boolean Mdum;
 	public boolean Hrd;
@@ -153,13 +152,28 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public boolean zx=true;
 	public Button done;
 	public int flag;
+	public void continu()
+	{
+		try
+		{
+			int p,s;
+			BufferedReader nest=new BufferedReader(new FileReader("ContinueOrNot.txt"));
+			p=Integer.parseInt(nest.readLine());
+			s=Integer.parseInt(nest.readLine());
+			if(p==0 && s==3)
+				cont.setEnabled(false);
+			else
+				cont.setEnabled(true);
+			nest.close();
+		}catch(Exception e) {}
+	}
 	public SnakeWorkSpace()
 	{
 		addKeyListener(this);
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
 		setLayout(null);
-		
+		continu();
 		try
 		{
 			BufferedReader ne=new BufferedReader(new FileReader("Direction.txt"));
@@ -178,6 +192,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 				Hrd=true;
 				Esy=Mdum=false;
 			}
+			ne.close();
 		}catch(Exception e) {}
 		
 		t=new Timer(speed,this);
@@ -216,17 +231,17 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		{
 			BufferedReader ne=new BufferedReader(new FileReader("Available.txt"));
 			flag=Integer.parseInt(ne.readLine());
+			ne.close();
 		}catch(Exception e) {}
 		cont = new Button("Continue");
 		cont.setBounds(275, 366, 140, 40);
 		cont.setFont(new Font("Tahoma",Font.BOLD,16));
 		cont.setBackground(new Color(102,0,102));
 		cont.setForeground(Color.WHITE);
-		cont.setVisible(true);
-		/*if(flag==1)
+		if(flag==1)
 			cont.setEnabled(false);
-		else if(flag==0)
-			cont.setEnabled(true);*/
+		else cont.setEnabled(true);
+		cont.setVisible(true);
 		cont.setFocusable(false);
 		cont.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
@@ -281,14 +296,14 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 						{
 							Mdum=true;
 							Esy=Hrd=false;
-							speed=80;
+							speed=75;
 							t.setDelay(speed);
 						}
 						if(l==3)
 						{
 							Hrd=true;
 							Mdum=Esy=false;
-							speed=70;
+							speed=65;
 							t.setDelay(speed);
 						}
 						collect2.close();
@@ -468,7 +483,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 				panel2.setVisible(false);
 				Esy=Hrd=false;
 				Mdum=true;
-				speed=80;
+				speed=75;
 				t.setDelay(speed);
 				t.start();
 				totalLoc=1660;
@@ -490,7 +505,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 				cont.setEnabled(false);
 				count=0;
 				panel2.setVisible(false);
-				speed=70;
+				speed=65;
 				t.setDelay(speed);
 				t.start();
 				totalLoc=1592;
@@ -882,18 +897,9 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 				GameOver(g);
 			}
 		}
-		StoreSnakeSize();
 		
 	}
-	public void StoreSnakeSize()
-	{
-		try
-		{
-			BufferedWriter buf=new BufferedWriter(new FileWriter("StoreSizeOfSnake.txt"));
-			buf.write(Integer.toString(size));
-			buf.close();
-		}catch(Exception e) {}
-	}
+	
 	public void MediumLevel(Graphics g2)
 	{
 		g2.setColor(Color.WHITE);
@@ -920,7 +926,6 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	}
 	public void GameOver(Graphics g2)
 	{
-		
 		panel.setVisible(true);
 		back.setVisible(false);
 		right=left=up=down=false;
