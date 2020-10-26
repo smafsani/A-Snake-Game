@@ -161,13 +161,9 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public boolean zx=true;
 	public Button done;
 	public int flag;
-        public AudioPlayer play;
-        public AudioStream music;
-        public AudioData data;
-        public ContinuousAudioDataStream loop=null;
         public int ok=0;
         public int lvlno=0;
-        Clip clipMainTheme;
+        Clip clipMainTheme,clipFrontTheme;
 	public void continu()
 	{
 		try
@@ -658,13 +654,13 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
         }
         public void setMusic()
         {
-            play=AudioPlayer.player;
-            try{
-                music=new AudioStream(new FileInputStream("start.wav"));
-                data=music.getData();
-                loop=new ContinuousAudioDataStream(data);
-                play.start(loop);
-            }catch(Exception e){}
+            try
+            {
+                AudioInputStream frontthm=AudioSystem.getAudioInputStream(new File("start.wav"));
+                clipFrontTheme=AudioSystem.getClip();
+                clipFrontTheme.open(frontthm);
+                clipFrontTheme.loop(Clip.LOOP_CONTINUOUSLY);
+            }catch(Exception error){}
         }
         public void EatingAppleSound()
         {
@@ -867,7 +863,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		}
 		else if(!FrontPage && !gameover)
 		{
-                        play.stop(loop);
+                        clipFrontTheme.stop();
 			sc.setVisible(false);
 			level.setVisible(false);
 			strt.setVisible(false);
