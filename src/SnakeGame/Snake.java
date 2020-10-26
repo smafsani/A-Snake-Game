@@ -19,6 +19,15 @@ import javax.swing.*;
 import java.awt.Button;
 import java.awt.Panel;
 import java.awt.TextField;
+import java.io.File;
+import java.io.FileInputStream;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import sun.audio.AudioData;
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
+import sun.audio.ContinuousAudioDataStream;
 public class Snake
 {
 	public static JFrame frame;
@@ -27,8 +36,8 @@ public class Snake
 	{
 		String siz,pos,applePos;
 		frame=new JFrame("Snake");
-		SnakeWorkSpace ob=new SnakeWorkSpace();
-		frame.setBounds(250,20,690,700);
+		final SnakeWorkSpace ob=new SnakeWorkSpace();
+		frame.setBounds(250,20,680,700);
 		frame.setBackground(Color.green);
 		frame.setVisible(true);
 		frame.setResizable(false);
@@ -152,6 +161,13 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public boolean zx=true;
 	public Button done;
 	public int flag;
+        public AudioPlayer play;
+        public AudioStream music;
+        public AudioData data;
+        public ContinuousAudioDataStream loop=null;
+        public int ok=0;
+        public int lvlno=0;
+        Clip clipMainTheme;
 	public void continu()
 	{
 		try
@@ -174,21 +190,28 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		setFocusTraversalKeysEnabled(false);
 		setLayout(null);
 		continu();
+                setMusic();
 		try
 		{
 			BufferedReader ne=new BufferedReader(new FileReader("Direction.txt"));
 			int k1=Integer.parseInt(ne.readLine());
 			int k2=Integer.parseInt(ne.readLine());
 			if(k2==1) {
-				Esy=true;
+                                speed=90;
+				totalLoc=1720;
+                                Esy=true;
 				Mdum=Hrd=false;
 			}
 			if(k2==2) {
-				Mdum=true;
+                                speed=75;
+				totalLoc=1660;
+                                Mdum=true;
 				Esy=Hrd=false;
 			}
 			if(k2==3)
 			{
+                                speed=65;
+                                totalLoc=1592;
 				Hrd=true;
 				Esy=Mdum=false;
 			}
@@ -207,12 +230,14 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		strt = new Button("New Game");
 		strt.setBounds(275, 325, 140, 40);
 		strt.setFont(new Font("Tahoma",Font.BOLD,16));
-		strt.setBackground(new Color(102,0,102));
-		strt.setForeground(Color.WHITE);
+		//strt.setBackground(new Color(102,0,102));
+		strt.setBackground(Color.RED);
+                strt.setForeground(Color.WHITE);
 		strt.setVisible(true);
 		strt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				right=true;
 				left=up=down=false;
 				Position=rand.nextInt(totalLoc);
@@ -221,6 +246,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 				FrontPage=false;
 				strt.setVisible(false);
 				count=0;
+                                MainTheme();
 				setHighScore();
 				repaint();
 				
@@ -236,16 +262,22 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		cont = new Button("Continue");
 		cont.setBounds(275, 366, 140, 40);
 		cont.setFont(new Font("Tahoma",Font.BOLD,16));
-		cont.setBackground(new Color(102,0,102));
+		cont.setBackground(Color.RED);
 		cont.setForeground(Color.WHITE);
 		if(flag==1)
 			cont.setEnabled(false);
 		else cont.setEnabled(true);
 		cont.setVisible(true);
-		cont.setFocusable(false);
 		cont.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ok=ok+1;
+                                ButtonClickSound();
+                                if(now && ok==2)
+                                {
+                                    MainTheme();
+                                    ok=0;
+                                }
 				int c,l;
 				if(now && flag==0)
 				{
@@ -309,12 +341,13 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 						collect2.close();
 					}catch(Exception ex) {}
 					count=1;
-					t.stop();
 					Score=size-3;
 					repaint();
 					now=false;
+                                        t.stop();
 				}
 				else {
+                                        MainTheme();
 					panel2.setVisible(false);
 					FrontPage=false;
 					repaint();
@@ -341,8 +374,10 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		restartbtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				gameover=false;
 				count=0;
+                                MainTheme();
 				Position=rand.nextInt(totalLoc);
 				right=true;
 				left=up=down=false;
@@ -359,11 +394,13 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		menu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				cont.setEnabled(true);
-				count=0;			
+                                ButtonClickSound();
+				cont.setEnabled(false);
+				count=0;
 				panel.setVisible(false);
 				FrontPage=true;
 				gameover=false;
+                                setMusic();
 				repaint();
 			}
 		});
@@ -385,6 +422,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				textField.setVisible(true);
 				save.setVisible(false);
 				done.setVisible(true);
@@ -400,6 +438,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		done.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				String str;
 				try
 				{
@@ -432,12 +471,20 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		level = new Button("Level");
 		level.setFont(new Font("Tahoma", Font.BOLD, 16));
 		level.setForeground(Color.WHITE);
-		level.setBackground(new Color(102,0,102));
+		level.setBackground(Color.RED);
 		level.setBounds(275, 407, 140, 40);
 		level.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				panel2.setVisible(true);
+                                ButtonClickSound();
+                                lvlno=lvlno+1;
+                                if(lvlno==1)
+                                    panel2.setVisible(true);
+                                else if(lvlno==2)
+                                {
+                                    panel2.setVisible(false);
+                                    lvlno=0;
+                                }
 			}
 		});
 		add(level);
@@ -452,10 +499,11 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		easy.setBounds(0, 0, 92, 31);
 		easy.setForeground(Color.WHITE);
 		easy.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		easy.setBackground(new Color(102,0,102));
+		easy.setBackground(Color.RED);
 		easy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				count=0;
 				cont.setEnabled(false);
 				panel2.setVisible(false);
@@ -473,11 +521,12 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		medium = new Button("Medium");
 		medium.setForeground(Color.WHITE);
 		medium.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		medium.setBackground(new Color(102,0,102));
+		medium.setBackground(Color.RED);
 		medium.setBounds(0, 31, 92, 31);
 		medium.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				cont.setEnabled(false);
 				count=0;
 				panel2.setVisible(false);
@@ -495,11 +544,12 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		hard = new Button("Hard");
 		hard.setForeground(Color.WHITE);
 		hard.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		hard.setBackground(new Color(102,0,102));
+		hard.setBackground(Color.RED);
 		hard.setBounds(0, 62, 92, 31);
 		hard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				Hrd=true;
 				Esy=Mdum=false;
 				cont.setEnabled(false);
@@ -523,9 +573,12 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				FrontPage=true;
 				t.stop();
+                                clipMainTheme.stop();
 				back.setVisible(false);
+                                setMusic();
 				repaint();
 			}
 		});
@@ -533,13 +586,14 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		
 		sc = new Button("Score Board");
 		sc.setBounds(275, 448, 140, 40);
-		sc.setBackground(new Color(102,0,102));
+		sc.setBackground(Color.RED);
 		sc.setForeground(Color.WHITE);
 		sc.setVisible(true);
 		sc.setFont(new Font("Tahoma",Font.BOLD,16));
 		sc.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				scrbd.setVisible(true);
 				easy.setEnabled(false);
 				medium.setEnabled(false);
@@ -556,13 +610,14 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		
 		scrbd = new Button("Back");
 		scrbd.setBounds(275, 448, 140, 40);
-		scrbd.setBackground(new Color(102,0,102));
+		scrbd.setBackground(Color.RED);
 		scrbd.setForeground(Color.WHITE);
 		scrbd.setVisible(false);
 		scrbd.setFont(new Font("Tahoma",Font.BOLD,16));
 		scrbd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				easy.setEnabled(true);
 				medium.setEnabled(true);
 				hard.setEnabled(true);
@@ -578,18 +633,71 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		
 		Quit = new Button("Exit");
 		Quit.setBounds(275, 489, 140, 40);
-		Quit.setBackground(new Color(102,0,102));
+		Quit.setBackground(Color.RED);
 		Quit.setForeground(Color.WHITE);
 		Quit.setVisible(true);
 		Quit.setFont(new Font("Tahoma",Font.BOLD,16));
 		Quit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
+                                ButtonClickSound();
 				System.exit(0);
 			}
 		});
 		add(Quit);
 	}
+        public void MainTheme()
+        {
+            try
+            {
+                AudioInputStream mainThm=AudioSystem.getAudioInputStream(new File("MainThemeSong.wav"));
+                clipMainTheme=AudioSystem.getClip();
+                clipMainTheme.open(mainThm);
+                clipMainTheme.loop(Clip.LOOP_CONTINUOUSLY);
+            }catch(Exception e){}
+        }
+        public void setMusic()
+        {
+            play=AudioPlayer.player;
+            try{
+                music=new AudioStream(new FileInputStream("start.wav"));
+                data=music.getData();
+                loop=new ContinuousAudioDataStream(data);
+                play.start(loop);
+            }catch(Exception e){}
+        }
+        public void EatingAppleSound()
+        {
+            Clip clip;
+            try{
+                AudioInputStream sound=AudioSystem.getAudioInputStream(new File("EatApple.wav"));
+                clip=AudioSystem.getClip();
+                clip.open(sound);
+                clip.start();
+            }catch(Exception er){}
+        }
+        public void SnakeDeathGameOver()
+        {
+            Clip clip;
+            try
+            {
+                AudioInputStream sound=AudioSystem.getAudioInputStream(new File("SnakeDeath.wav"));
+                clip=AudioSystem.getClip();
+                clip.open(sound);
+                clip.start();
+            }catch(Exception e){}
+        }
+        public void ButtonClickSound()
+        {
+            Clip clip;
+            try
+            {
+                AudioInputStream sound=AudioSystem.getAudioInputStream(new File("ClickButton.wav"));
+                clip=AudioSystem.getClip();
+                clip.open(sound);
+                clip.start();
+            }catch(Exception e){}
+        }
 	public void StoreCurrentInfo()
 	{
 		if(!gameover) {
@@ -747,7 +855,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		if(FrontPage) 
 		{
 			//IMAGEICON FOR THE FRONT IMAGE
-			ImageIcon fnt=new ImageIcon(getClass().getResource("/image/Front.png"));
+			ImageIcon fnt=new ImageIcon(getClass().getResource("/image/FrontPic.png"));
 			fpg=fnt.getImage();
 			g.drawImage(fpg,0,0,this);
 			
@@ -759,6 +867,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		}
 		else if(!FrontPage && !gameover)
 		{
+                        play.stop(loop);
 			sc.setVisible(false);
 			level.setVisible(false);
 			strt.setVisible(false);
@@ -766,7 +875,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 			back.setVisible(true);
 			Quit.setVisible(false);
 			//BackGround
-			g.setColor(Color.GRAY);
+			g.setColor(Color.ORANGE);
 			g.fillRect(0,0,690,700);
 			
 			//TITLE IMAGE
@@ -843,6 +952,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 			apple=ap.getImage();
 			if(Loc[Position].xPos==x[0] && Loc[Position].yPos==y[0])
 			{
+                                EatingAppleSound();
 				size++;
 				Score++;
 				locationOfNewApple();
@@ -926,7 +1036,9 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	}
 	public void GameOver(Graphics g2)
 	{
-		panel.setVisible(true);
+                clipMainTheme.stop();
+		SnakeDeathGameOver();
+                panel.setVisible(true);
 		back.setVisible(false);
 		right=left=up=down=false;
 		g2.setColor(Color.GRAY);
@@ -1014,31 +1126,31 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		}
 		if(key==KeyEvent.VK_RIGHT && !left && !FrontPage)
 		{
-			t.start();
 			count+=1;
 			right=true;
 			up=down=false;
+                        t.start();
 		}
 		if(key==KeyEvent.VK_LEFT && !right && !FrontPage)
 		{
-			t.start();
 			count+=1;
 			left=true;
 			up=down=false;
+                        t.start();
 		}
 		if(key==KeyEvent.VK_UP && !down && !FrontPage)
 		{
-			t.start();
 			count+=1;
 			up=true;
 			right=left=false;
+                        t.start();
 		}
 		if(key==KeyEvent.VK_DOWN && !up && !FrontPage)
 		{
-			t.start();
 			count+=1;
 			down=true;
 			right=left=false;
+                        t.start();
 		}
 	}
 
