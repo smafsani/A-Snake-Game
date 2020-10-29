@@ -24,10 +24,6 @@ import java.io.FileInputStream;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import sun.audio.AudioData;
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
-import sun.audio.ContinuousAudioDataStream;
 public class Snake
 {
 	public static JFrame frame;
@@ -37,7 +33,7 @@ public class Snake
 		String siz,pos,applePos;
 		frame=new JFrame("Snake");
 		final SnakeWorkSpace ob=new SnakeWorkSpace();
-		frame.setBounds(250,20,680,700);
+		frame.setBounds(0,0,680,700);
 		frame.setBackground(Color.green);
 		frame.setVisible(true);
 		frame.setResizable(false);
@@ -113,15 +109,6 @@ public class Snake
 		catch(Exception exc){}
 	}
 }
-class appleLoc
-{
-	int xPos,yPos;
-	public appleLoc(int aa,int bb)
-	{
-		xPos=aa;
-		yPos=bb;
-	}
-}
 class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 {
 	
@@ -145,15 +132,16 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	public boolean gameover=false;
 	public Button easy,medium,hard,level,Quit;
 	public Random rand=new Random();
-	public int totalLoc=1720;
+	public static int totalLoc=1720;
 	public int Position;
 	public int q,r,sco=0;
 	public Panel panel,panel2;
 	public static Button save,sc,restartbtn,menu,back,cont,strt,scrbd;
-	public boolean Esy;
-	public boolean Mdum;
-	public boolean Hrd;
-	public appleLoc[] Loc;
+	public static boolean Esy;
+	public static boolean Mdum;
+	public static boolean Hrd;
+	public static int xPos[]=new int[totalLoc];
+	public static int yPos[]=new int[totalLoc];
 	String lv="Easy";
 	public String s;
 	public boolean now=true;
@@ -186,464 +174,547 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		setFocusTraversalKeysEnabled(false);
 		setLayout(null);
 		continu();
-                setMusic();
-		try
+        setMusic(true);
+        if(Esy && !Mdum && !Hrd)
+	{
+		int k=0;
+		xPos=new int[totalLoc];
+		yPos=new int[totalLoc];
+		Position=rand.nextInt(totalLoc);
+                for(int i=15;i<=645;i+=15)
 		{
-			BufferedReader ne=new BufferedReader(new FileReader("Direction.txt"));
-			int k1=Integer.parseInt(ne.readLine());
-			int k2=Integer.parseInt(ne.readLine());
-			if(k2==1) {
-                                speed=90;
-				totalLoc=1720;
-                                Esy=true;
-				Mdum=Hrd=false;
-			}
-			if(k2==2) {
-                                speed=75;
-				totalLoc=1660;
-                                Mdum=true;
-				Esy=Hrd=false;
-			}
-			if(k2==3)
+			for(int j=55;j<=640;j+=15)
 			{
-                                speed=65;
-                                totalLoc=1592;
-				Hrd=true;
-				Esy=Mdum=false;
+				xPos[k]=i;
+				yPos[k]=j;
+				k++;
 			}
-			ne.close();
-		}catch(Exception e) {}
-		
-		t=new Timer(speed,this);
-		t.setDelay(speed);
-		t.start();
-		//run(speed);
-		setHighScore();
-		
-		
-		
-		//Start Button for starting the GamePlay as well as
-		strt = new Button("New Game");
-		strt.setBounds(275, 325, 140, 40);
-		strt.setFont(new Font("Tahoma",Font.BOLD,16));
-		//strt.setBackground(new Color(102,0,102));
-		strt.setBackground(Color.RED);
-                strt.setForeground(Color.WHITE);
-		strt.setVisible(true);
-		strt.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				right=true;
-				left=up=down=false;
-				Position=rand.nextInt(totalLoc);
-				cont.setEnabled(true);
-				panel2.setVisible(false);
-				FrontPage=false;
-				strt.setVisible(false);
-				count=0;
-                                MainTheme();
-				setHighScore();
-				repaint();
-				
-			}
-		});
-		add(strt);
-		try
+		}
+	}
+	if(Mdum && !Esy && !Hrd)
+	{
+		int k=0;
+		xPos=new int[totalLoc];
+		yPos=new int[totalLoc];
+                Position=rand.nextInt(totalLoc);
+		for(int j=55;j<=640;j+=15)
 		{
-			BufferedReader ne=new BufferedReader(new FileReader("Available.txt"));
-			flag=Integer.parseInt(ne.readLine());
-			ne.close();
-		}catch(Exception e) {}
-		cont = new Button("Continue");
-		cont.setBounds(275, 366, 140, 40);
-		cont.setFont(new Font("Tahoma",Font.BOLD,16));
-		cont.setBackground(Color.RED);
-		cont.setForeground(Color.WHITE);
-		if(flag==1)
-			cont.setEnabled(false);
-		else cont.setEnabled(true);
-		cont.setVisible(true);
-		cont.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
+			for(int i=15;i<=645;i+=15)
 			{
-                                ok=ok+1;
-                                ButtonClickSound();
-                                if(now && ok==2)
-                                {
-                                    MainTheme();
-                                    ok=0;
+				if(((j<280 || j>295) || (i<225 || i>435)) && j<=295)
+                	        {
+                                    xPos[k]=i;
+                                    yPos[k]=j;
+                                    k++;
                                 }
-				int c,l;
-				if(now && flag==0)
-				{
-					try{
-						BufferedReader collect=new BufferedReader(new FileReader("Store.txt"));
-						BufferedReader collect2=new BufferedReader(new FileReader("Direction.txt"));
-						Position=Integer.parseInt(collect.readLine());
-						size=Integer.parseInt(collect.readLine());
-						for(int j=0;j<size;j++)
-						{
-							x[j]=Integer.parseInt(collect.readLine());
-						}
-						for(int j=0;j<size;j++)
-						{
-							y[j]=Integer.parseInt(collect.readLine());
-						}
-						collect.close();
-						c=Integer.parseInt(collect2.readLine());
-						if(c==1)
-						{
-							right=true;
-							left=up=down=false;
-						}
-						if(c==2)
-						{
-							left=true;
-							right=up=down=false;
-						}
-						if(c==3)
-						{
-							up=true;
-							left=right=down=false;
-						}
-						if(c==4)
-						{
-							down=true;
-							left=up=right=false;
-						}
-						l=Integer.parseInt(collect2.readLine());
-						if(l==1)
-						{
-							Esy=true;
-							Mdum=Hrd=false;
-							speed=90;
-							t.setDelay(speed);
-						}
-						if(l==2)
-						{
-							Mdum=true;
-							Esy=Hrd=false;
-							speed=75;
-							t.setDelay(speed);
-						}
-						if(l==3)
-						{
-							Hrd=true;
-							Mdum=Esy=false;
-							speed=65;
-							t.setDelay(speed);
-						}
-						collect2.close();
-					}catch(Exception ex) {}
-					count=1;
-					Score=size-3;
-					repaint();
-					now=false;
-                                        t.stop();
-				}
-				else {
-                                        MainTheme();
-					panel2.setVisible(false);
-					FrontPage=false;
-					repaint();
-				}
-				setHighScore();
-			}
-		});
-		add(cont);
-		
-		panel = new Panel();
-		panel.setBackground(Color.BLACK);
-		panel.setForeground(Color.WHITE);
-		panel.setBounds(225, 313, 205, 145);
-		panel.setVisible(false);
-		add(panel);
-		panel.setLayout(null);
-		
-		
-		restartbtn = new Button("Restart");
-		restartbtn.setForeground(Color.BLACK);
-		restartbtn.setBackground(Color.WHITE);
-		restartbtn.setFont(new Font("Tahoma", Font.BOLD, 14));
-		restartbtn.setBounds(30, 0, 120, 30);
-		restartbtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				gameover=false;
-				count=0;
-                                MainTheme();
-				Position=rand.nextInt(totalLoc);
-				right=true;
-				left=up=down=false;
-				panel.setVisible(false);
-			}
-		});
-		panel.add(restartbtn);
-		
-		menu = new Button("Main Menu");
-		menu.setForeground(Color.BLACK);
-		menu.setBackground(Color.WHITE);
-		menu.setFont(new Font("Tahoma", Font.BOLD, 14));
-		menu.setBounds(30, 31, 120, 30);
-		menu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				cont.setEnabled(false);
-				count=0;
-				panel.setVisible(false);
-				FrontPage=true;
-				gameover=false;
-                                setMusic();
-				repaint();
-			}
-		});
-		panel.add(menu);
-		
-		textField=new TextField();
-		textField.setBounds(30, 93, 200, 50);
-		textField.setBackground(Color.white);
-		textField.setForeground(Color.black);
-		textField.setVisible(false);
-		textField.setFont(new Font("Tahoma",Font.BOLD,16));
-		panel.add(textField);
-		
-		save = new Button("Save");
-		save.setBackground(Color.WHITE);
-		save.setFont(new Font("Tahoma", Font.BOLD, 14));
-		save.setForeground(Color.BLACK);
-		save.setBounds(30, 62, 120, 30);
-		save.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				textField.setVisible(true);
-				save.setVisible(false);
-				done.setVisible(true);
-			}
-		});
-		panel.add(save);
-		
-		done = new Button("Done");
-		done.setBackground(Color.WHITE);
-		done.setFont(new Font("Tahoma", Font.BOLD, 14));
-		done.setForeground(Color.BLACK);
-		done.setBounds(30, 62, 120, 30);
-		done.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				String str;
-				try
-				{
-					BufferedWriter out=new BufferedWriter(new FileWriter("Scores.txt",true));
-					out.newLine();
-					str=textField.getText();
-					if(Esy && str!="")
-						out.write(str+" "+Score+" (Easy)");
-					else if(Mdum && str!="")
-						out.write(str+" "+Score+" (Medium)");
-					else if(Hrd && str!="")
-						out.write(str+" "+Score+" (Hard)");
-					out.close();
-				}
-				catch(Exception ec) {}
-				done.setVisible(false);
-				save.setVisible(true);
-				cont.setEnabled(false);
-				count=0;	
-				textField.setText(null);
-				panel.setVisible(false);
-				textField.setVisible(false);
-				FrontPage=true;
-				gameover=false;
-				repaint();
-			}
-		});
-		panel.add(done);
-		
-		level = new Button("Level");
-		level.setFont(new Font("Tahoma", Font.BOLD, 16));
-		level.setForeground(Color.WHITE);
-		level.setBackground(Color.RED);
-		level.setBounds(275, 407, 140, 40);
-		level.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-                                lvlno=lvlno+1;
-                                if(lvlno==1)
-                                    panel2.setVisible(true);
-                                else if(lvlno==2)
+                                else if(((j<370 || j>385) || (i<225 || i>435)) && j>295)
                                 {
-                                    panel2.setVisible(false);
-                                    lvlno=0;
+                                    xPos[k]=i;
+                                    yPos[k]=j;
+                                    k++;
                                 }
 			}
-		});
-		add(level);
+		}
+	}
+	if(Hrd && !Esy && !Mdum)
+	{
+		int k=0;
+		xPos=new int[totalLoc];
+		yPos=new int[totalLoc];
+                Position=rand.nextInt(totalLoc);
+		for(int j=55;j<=640;j+=15)
+                {
+                    for(int i=15;i<=645;i+=15)
+                    {
+                        if(((i>=15 && i<=105) || (i>=270 && i<=360) || (i>=525 && i<=645)) && (j>=175 && j<=190))
+                        {
+		                xPos[k]=i;
+		                yPos[k]=j;
+		                k++;
+		        }
+		        else if(((i>=15 && i<=105) || (i>=270 && i<=360) || (i>=525 && i<=645)) && (j>=490 && j<=505)){
+		            	xPos[k]=i;
+		                yPos[k]=j;
+		                k++;
+		        }
+		        else if(((i>=15 && i<=105) || (i>=150 && i<=480) || (i>=525 && i<=645)) && (j>=205 && j<=280))
+		        {
+		            	xPos[k]=i;
+		                yPos[k]=j;
+		                k++;
+		        }
+		        else if(((i>=15 && i<=105) || (i>=150 && i<=480) || (i>=525 && i<=645)) && (j>=400 && j<=475))
+                        {
+		            	xPos[k]=i;
+		                yPos[k]=j;
+		                k++;
+		        }
+		        else if((j>=55 && j<175) || (j>505 && j<=640) || (j>=295 && j<400))
+		        {
+		            	xPos[k]=i;
+		                yPos[k]=j;
+		                k++;
+                        }
+                    }
+		}
+	}
+	try
+	{
+		BufferedReader ne=new BufferedReader(new FileReader("Direction.txt"));
+		int k1=Integer.parseInt(ne.readLine());
+		int k2=Integer.parseInt(ne.readLine());
+    		if(k2==1) {
+                        speed=90;
+			totalLoc=1720;
+                        Esy=true;
+			Mdum=Hrd=false;
+		}
+		if(k2==2) {
+                        speed=75;
+			totalLoc=1660;
+                        Mdum=true;
+			Esy=Hrd=false;
+		}
+		if(k2==3)
+		{
+                        speed=65;
+                        totalLoc=1592;
+			Hrd=true;
+			Esy=Mdum=false;
+		}
+		ne.close();
+	}catch(Exception e) {}
 		
-		panel2 = new Panel();
-		panel2.setBounds(420, 468, 92, 93);
-		panel2.setVisible(false);
-		add(panel2);
-		panel2.setLayout(null);
-		
-		easy = new Button("Easy");
-		easy.setBounds(0, 0, 92, 31);
-		easy.setForeground(Color.WHITE);
-		easy.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		easy.setBackground(Color.RED);
-		easy.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				count=0;
-				cont.setEnabled(false);
-				panel2.setVisible(false);
-				speed=90;
-				t.setDelay(speed);
+	t=new Timer(speed,this);
+	t.setDelay(speed);
+	t.start();
+	setHighScore();		
+	//Start Button for starting the GamePlay as well as
+	strt = new Button("New Game");
+	strt.setBounds(275, 325, 140, 40);
+	strt.setFont(new Font("Tahoma",Font.BOLD,16));
+	//strt.setBackground(new Color(102,0,102));
+	strt.setBackground(Color.RED);
+        strt.setForeground(Color.WHITE);
+	strt.setVisible(true);
+	strt.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                    ButtonClickSound();
+                    setMusic(false);
+                    right=true;
+                    left=up=down=false;
+               	    if(Esy)
+			Position=rand.nextInt(1720);
+                    if(Mdum)
+			Position=rand.nextInt(1660);
+                    if(Hrd)
+			Position=rand.nextInt(1592);
+                    cont.setEnabled(true);
+                    panel2.setVisible(false);
+                    FrontPage=false;
+                    strt.setVisible(false);
+                    count=0;
+                    MainTheme(true);
+                    setHighScore();
+                    repaint();
+		}
+        });
+        add(strt);
+	try
+	{
+		BufferedReader ne=new BufferedReader(new FileReader("Available.txt"));
+		flag=Integer.parseInt(ne.readLine());
+		ne.close();
+	}catch(Exception e) {}
+	cont = new Button("Continue");
+	cont.setBounds(275, 366, 140, 40);
+	cont.setFont(new Font("Tahoma",Font.BOLD,16));
+	cont.setBackground(Color.RED);
+	cont.setForeground(Color.WHITE);
+	if(flag==1)
+		cont.setEnabled(false);
+	else cont.setEnabled(true);
+	cont.setVisible(true);
+	cont.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                    ok=ok+1;
+                    ButtonClickSound();
+                    setMusic(false);
+                    if(now && ok==2)
+                    {
+                        MainTheme(true);
+                        ok=0;
+                    }
+                    int c,l;
+                    if(now && flag==0)
+                    {
+			try{
+                            BufferedReader collect=new BufferedReader(new FileReader("Store.txt"));
+                            BufferedReader collect2=new BufferedReader(new FileReader("Direction.txt"));
+                            Position=Integer.parseInt(collect.readLine());
+                            size=Integer.parseInt(collect.readLine());
+                            for(int j=0;j<size;j++)
+                            {
+				x[j]=Integer.parseInt(collect.readLine());
+                            }
+                            for(int j=0;j<size;j++)
+                            {
+				y[j]=Integer.parseInt(collect.readLine());
+                            }
+                            collect.close();
+                            c=Integer.parseInt(collect2.readLine());
+                            if(c==1)
+                            {
+				right=true;
+				left=up=down=false;
+                            }
+                            if(c==2)
+                            {
+				left=true;
+				right=up=down=false;
+                            }
+                            if(c==3)
+                            {
+				up=true;
+                      		left=right=down=false;
+                            }
+                            if(c==4)
+                            {
+				down=true;
+				left=up=right=false;
+                            }
+                            l=Integer.parseInt(collect2.readLine());
+                            if(l==1)
+                            {
 				Esy=true;
 				Mdum=Hrd=false;
-				totalLoc=1720;
-				Position=rand.nextInt(totalLoc);
-			}
-		});
-		panel2.add(easy);
-		
-		
-		medium = new Button("Medium");
-		medium.setForeground(Color.WHITE);
-		medium.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		medium.setBackground(Color.RED);
-		medium.setBounds(0, 31, 92, 31);
-		medium.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				cont.setEnabled(false);
-				count=0;
-				panel2.setVisible(false);
-				Esy=Hrd=false;
+				speed=90;
+				t.setDelay(speed);
+                            }
+                            if(l==2)
+                            {
 				Mdum=true;
+				Esy=Hrd=false;
 				speed=75;
 				t.setDelay(speed);
-				t.start();
-				totalLoc=1660;
-				Position=rand.nextInt(totalLoc);
-			}
-		});
-		panel2.add(medium);
-		
-		hard = new Button("Hard");
-		hard.setForeground(Color.WHITE);
-		hard.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		hard.setBackground(Color.RED);
-		hard.setBounds(0, 62, 92, 31);
-		hard.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
+                            }
+                            if(l==3)
+                            {
 				Hrd=true;
-				Esy=Mdum=false;
-				cont.setEnabled(false);
-				count=0;
-				panel2.setVisible(false);
+				Mdum=Esy=false;
 				speed=65;
 				t.setDelay(speed);
-				t.start();
-				totalLoc=1592;
-				Position=rand.nextInt(totalLoc);
+                            }
+                            collect2.close();
+                        }catch(Exception ex) {}
+			count=1;
+			Score=size-3;
+			repaint();
+			now=false;
+                        t.stop();
 			}
-		});
-		panel2.add(hard);
-		
-		back = new Button("Main Menu");
-		back.setForeground(Color.WHITE);
-		back.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		back.setBackground(Color.BLACK);
-		back.setBounds(590, 1, 80, 22);
-		back.setVisible(false);
-		back.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				FrontPage=true;
-				t.stop();
-                                clipMainTheme.stop();
-				back.setVisible(false);
-                                setMusic();
-				repaint();
+			else {
+                            MainTheme(true);
+                            panel2.setVisible(false);
+                            FrontPage=false;
+                            repaint();
 			}
-		});
-		add(back);
+			setHighScore();
+		}
+	});
+	add(cont);
+        
+	panel = new Panel();
+	panel.setBackground(Color.BLACK);
+	panel.setForeground(Color.WHITE);
+	panel.setBounds(225, 313, 205, 145);
+	panel.setVisible(false);
+	add(panel);
+	panel.setLayout(null);
 		
-		sc = new Button("Score Board");
-		sc.setBounds(275, 448, 140, 40);
-		sc.setBackground(Color.RED);
-		sc.setForeground(Color.WHITE);
-		sc.setVisible(true);
-		sc.setFont(new Font("Tahoma",Font.BOLD,16));
-		sc.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
+	restartbtn = new Button("Restart");
+	restartbtn.setForeground(Color.BLACK);
+	restartbtn.setBackground(Color.WHITE);
+	restartbtn.setFont(new Font("Tahoma", Font.BOLD, 14));
+	restartbtn.setBounds(30, 0, 120, 30);
+	restartbtn.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			gameover=false;
+			count=0;
+                        MainTheme(true);
+                        Position=rand.nextInt(totalLoc);
+			right=true;
+			left=up=down=false;
+			panel.setVisible(false);
+		}
+	});
+	panel.add(restartbtn);
+		
+	menu = new Button("Main Menu");
+	menu.setForeground(Color.BLACK);
+	menu.setBackground(Color.WHITE);
+	menu.setFont(new Font("Tahoma", Font.BOLD, 14));
+	menu.setBounds(30, 31, 120, 30);
+	menu.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			cont.setEnabled(false);
+			count=0;
+			panel.setVisible(false);
+			FrontPage=true;
+			gameover=false;
+                        setMusic(true);
+			repaint();
+		}
+	});
+	panel.add(menu);
+		
+	textField=new TextField();
+	textField.setBounds(30, 93, 200, 50);
+	textField.setBackground(Color.white);
+	textField.setForeground(Color.black);
+	textField.setVisible(false);
+	textField.setFont(new Font("Tahoma",Font.BOLD,16));
+	panel.add(textField);
+		
+	save = new Button("Save");
+	save.setBackground(Color.WHITE);
+	save.setFont(new Font("Tahoma", Font.BOLD, 14));
+	save.setForeground(Color.BLACK);
+	save.setBounds(30, 62, 120, 30);
+	save.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			textField.setVisible(true);
+			save.setVisible(false);
+			done.setVisible(true);
+		}
+	});
+	panel.add(save);
+		
+	done = new Button("Done");
+	done.setBackground(Color.WHITE);
+	done.setFont(new Font("Tahoma", Font.BOLD, 14));
+	done.setForeground(Color.BLACK);
+	done.setBounds(30, 62, 120, 30);
+	done.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			String str;
+			try
 			{
-                                ButtonClickSound();
-				scrbd.setVisible(true);
-				easy.setEnabled(false);
-				medium.setEnabled(false);
-				hard.setEnabled(false);
-				strt.setEnabled(false);
-				cont.setEnabled(false);
-				level.setEnabled(false);
-				Snake ob=new Snake(true);
-				sc.setVisible(false);
+				BufferedWriter out=new BufferedWriter(new FileWriter("Scores.txt",true));
+				out.newLine();
+				str=textField.getText();
+				if(Esy && str!="")
+					out.write(str+" "+Score+" (Easy)");
+				else if(Mdum && str!="")
+					out.write(str+" "+Score+" (Medium)");
+				else if(Hrd && str!="")
+					out.write(str+" "+Score+" (Hard)");
+				out.close();
+			}
+			catch(Exception ec) {}
+			done.setVisible(false);
+			save.setVisible(true);
+			cont.setEnabled(false);
+			count=0;	
+			textField.setText(null);
+			panel.setVisible(false);
+			textField.setVisible(false);
+			FrontPage=true;
+			gameover=false;
+			repaint();
+		}
+	});
+	panel.add(done);
+		
+	level = new Button("Level");
+	level.setFont(new Font("Tahoma", Font.BOLD, 16));
+	level.setForeground(Color.WHITE);
+	level.setBackground(Color.RED);
+	level.setBounds(275, 407, 140, 40);
+	level.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+                        lvlno=lvlno+1;
+                        if(lvlno==1)
+                            panel2.setVisible(true);
+                        else if(lvlno==2)
+                        {
+                            panel2.setVisible(false);
+                            lvlno=0;
+                        }
+		}
+	});
+	add(level);
+		
+	panel2 = new Panel();
+	panel2.setBounds(420, 468, 92, 93);
+	panel2.setVisible(false);
+	add(panel2);
+	panel2.setLayout(null);
+	
+	easy = new Button("Easy");
+	easy.setBounds(0, 0, 92, 31);
+	easy.setForeground(Color.WHITE);
+	easy.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	easy.setBackground(Color.RED);
+	easy.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			count=0;
+			cont.setEnabled(false);
+			panel2.setVisible(false);
+			speed=90;
+			t.setDelay(speed);
+			Esy=true;
+			Mdum=Hrd=false;
+			totalLoc=1720;
+			Position=rand.nextInt(totalLoc);
+		}
+	});
+	panel2.add(easy);
 				
-			}
-		});
-		add(sc);
+	medium = new Button("Medium");
+	medium.setForeground(Color.WHITE);
+	medium.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	medium.setBackground(Color.RED);
+	medium.setBounds(0, 31, 92, 31);
+	medium.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			cont.setEnabled(false);
+			count=0;
+			panel2.setVisible(false);
+			Esy=Hrd=false;
+			Mdum=true;
+			speed=75;
+			t.setDelay(speed);
+			t.start();
+			totalLoc=1660;
+			Position=rand.nextInt(totalLoc);
+		}
+	});
+	panel2.add(medium);
+	
+	hard = new Button("Hard");
+	hard.setForeground(Color.WHITE);
+	hard.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	hard.setBackground(Color.RED);
+	hard.setBounds(0, 62, 92, 31);
+	hard.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			Hrd=true;
+			Esy=Mdum=false;
+			cont.setEnabled(false);
+			count=0;
+			panel2.setVisible(false);
+			speed=65;
+			t.setDelay(speed);
+			t.start();
+			totalLoc=1592;
+			Position=rand.nextInt(totalLoc);
+		}
+	});
+	panel2.add(hard);
+	
+	back = new Button("Main Menu");
+	back.setForeground(Color.WHITE);
+	back.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	back.setBackground(Color.BLACK);
+	back.setBounds(590, 1, 80, 22);
+	back.setVisible(false);
+	back.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                    ButtonClickSound();
+                    FrontPage=true;
+                    t.stop();
+                    MainTheme(false);
+                    back.setVisible(false);
+                    setMusic(true);
+                    repaint();
+		}
+	});
+	add(back);
 		
-		scrbd = new Button("Back");
-		scrbd.setBounds(275, 448, 140, 40);
-		scrbd.setBackground(Color.RED);
-		scrbd.setForeground(Color.WHITE);
-		scrbd.setVisible(false);
-		scrbd.setFont(new Font("Tahoma",Font.BOLD,16));
-		scrbd.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				easy.setEnabled(true);
-				medium.setEnabled(true);
-				hard.setEnabled(true);
-				strt.setEnabled(true);
-				cont.setEnabled(true);
-				level.setEnabled(true);
-				sc.setVisible(true);
-				scrbd.setVisible(false);
-				Snake ob=new Snake(false);
-			}
-		});
-		add(scrbd);
+	sc = new Button("Score Board");
+	sc.setBounds(275, 448, 140, 40);
+	sc.setBackground(Color.RED);
+	sc.setForeground(Color.WHITE);
+	sc.setVisible(true);
+	sc.setFont(new Font("Tahoma",Font.BOLD,16));
+	sc.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			scrbd.setVisible(true);
+			easy.setEnabled(false);
+			medium.setEnabled(false);
+			hard.setEnabled(false);
+			strt.setEnabled(false);
+			cont.setEnabled(false);
+			level.setEnabled(false);
+			Snake ob=new Snake(true);
+			sc.setVisible(false);
+		}
+	});
+	add(sc);
 		
-		Quit = new Button("Exit");
-		Quit.setBounds(275, 489, 140, 40);
-		Quit.setBackground(Color.RED);
-		Quit.setForeground(Color.WHITE);
-		Quit.setVisible(true);
-		Quit.setFont(new Font("Tahoma",Font.BOLD,16));
-		Quit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-                                ButtonClickSound();
-				System.exit(0);
-			}
-		});
-		add(Quit);
-	}
-        public void MainTheme()
+	scrbd = new Button("Back");
+	scrbd.setBounds(275, 448, 140, 40);
+	scrbd.setBackground(Color.RED);
+	scrbd.setForeground(Color.WHITE);
+	scrbd.setVisible(false);
+	scrbd.setFont(new Font("Tahoma",Font.BOLD,16));
+	scrbd.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                        ButtonClickSound();
+			easy.setEnabled(true);
+			medium.setEnabled(true);
+			hard.setEnabled(true);
+			strt.setEnabled(true);
+			cont.setEnabled(true);
+			level.setEnabled(true);
+			sc.setVisible(true);
+			scrbd.setVisible(false);
+			Snake ob=new Snake(false);
+		}
+	});
+	add(scrbd);
+		
+	Quit = new Button("Exit");
+	Quit.setBounds(275, 489, 140, 40);
+	Quit.setBackground(Color.RED);
+	Quit.setForeground(Color.WHITE);
+	Quit.setVisible(true);
+	Quit.setFont(new Font("Tahoma",Font.BOLD,16));
+	Quit.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e)
+		{
+                    ButtonClickSound();
+                    System.exit(0);
+		}
+	});
+	add(Quit);
+        }
+        public void MainTheme(boolean x)
         {
+            if(x) {
             try
             {
                 AudioInputStream mainThm=AudioSystem.getAudioInputStream(new File("MainThemeSong.wav"));
@@ -651,9 +722,17 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
                 clipMainTheme.open(mainThm);
                 clipMainTheme.loop(Clip.LOOP_CONTINUOUSLY);
             }catch(Exception e){}
+            }
+            else
+            {
+        	try {
+                    clipMainTheme.stop();
+        	}catch(Exception e) {}
+            }
         }
-        public void setMusic()
+        public void setMusic(boolean x)
         {
+            if(x) {
             try
             {
                 AudioInputStream frontthm=AudioSystem.getAudioInputStream(new File("start.wav"));
@@ -661,6 +740,13 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
                 clipFrontTheme.open(frontthm);
                 clipFrontTheme.loop(Clip.LOOP_CONTINUOUSLY);
             }catch(Exception error){}
+            }
+            else
+            {
+        	try {
+                    clipFrontTheme.stop();
+        	}catch(Exception e){}
+            }
         }
         public void EatingAppleSound()
         {
@@ -760,17 +846,19 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		cont.setVisible(scoreboard);
 		sc.setVisible(scoreboard);
 	}
-	public void setAppleLocation()
+	public static void setAppleLocation()
 	{
 		if(Esy && !Mdum && !Hrd)
 		{
 			int k=0;
-			Loc=new appleLoc[totalLoc+2];
+			xPos=new int[totalLoc];
+			yPos=new int[totalLoc];
 			for(int i=15;i<=645;i+=15)
 			{
 				for(int j=55;j<=640;j+=15)
 				{
-					Loc[k]=new appleLoc(i,j);
+					xPos[k]=i;
+					yPos[k]=j;
 					k++;
 				}
 			}
@@ -778,19 +866,22 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		if(Mdum && !Esy && !Hrd)
 		{
 			int k=0;
-			Loc=new appleLoc[totalLoc];
+			xPos=new int[totalLoc];
+			yPos=new int[totalLoc];
 			for(int j=55;j<=640;j+=15)
 			{
 				for(int i=15;i<=645;i+=15)
 				{
 					if(((j<280 || j>295) || (i<225 || i>435)) && j<=295)
 		            {
-		                Loc[k]=new appleLoc(i,j);
+		                xPos[k]=i;
+		                yPos[k]=j;
 		                k++;
 		            }
 		            else if(((j<370 || j>385) || (i<225 || i>435)) && j>295)
 		            {
-		                Loc[k]=new appleLoc(i,j);
+		            	xPos[k]=i;
+		                yPos[k]=j;
 		                k++;
 		            }
 				}
@@ -798,35 +889,41 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		}
 		if(Hrd && !Esy && !Mdum)
 		{
-			int k=0;
-			Loc=new appleLoc[totalLoc];
-			for(int j=55;j<=640;j+=15)
+                    int k=0;
+                    xPos=new int[totalLoc];
+                    yPos=new int[totalLoc];
+                    for(int j=55;j<=640;j+=15)
 		    {
 		        for(int i=15;i<=645;i+=15)
 		        {
 		            if(((i>=15 && i<=105) || (i>=270 && i<=360) || (i>=525 && i<=645)) && (j>=175 && j<=190)){
 
-		                Loc[k]=new appleLoc(i,j);
+		                xPos[k]=i;
+		                yPos[k]=j;
 		                k++;
 		            }
 		            else if(((i>=15 && i<=105) || (i>=270 && i<=360) || (i>=525 && i<=645)) && (j>=490 && j<=505)){
 
-		                Loc[k]=new appleLoc(i,j); 
+		            	xPos[k]=i;
+		                yPos[k]=j;
 		                k++;
 		            }
 		            else if(((i>=15 && i<=105) || (i>=150 && i<=480) || (i>=525 && i<=645)) && (j>=205 && j<=280))
 		            {
-		            	Loc[k]=new appleLoc(i,j);
+		            	xPos[k]=i;
+		                yPos[k]=j;
 		                k++;
 		            }
 		            else if(((i>=15 && i<=105) || (i>=150 && i<=480) || (i>=525 && i<=645)) && (j>=400 && j<=475))
 		            {
-		            	Loc[k]=new appleLoc(i,j);
+		            	xPos[k]=i;
+		                yPos[k]=j;
 		                k++;
 		            }
 		            else if((j>=55 && j<175) || (j>505 && j<=640) || (j>=295 && j<400))
 		            {
-		            	Loc[k]=new appleLoc(i,j);
+		            	xPos[k]=i;
+		                yPos[k]=j;
 		                k++;
 		            }
 		        }
@@ -863,7 +960,6 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		}
 		else if(!FrontPage && !gameover)
 		{
-                        clipFrontTheme.stop();
 			sc.setVisible(false);
 			level.setVisible(false);
 			strt.setVisible(false);
@@ -892,7 +988,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 			if(Esy)
 			{
 				lv="Easy";
-				speed=120;
+				speed=90;
 			}
 			if(Mdum)
 			{
@@ -946,14 +1042,14 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 				}
 			}
 			apple=ap.getImage();
-			if(Loc[Position].xPos==x[0] && Loc[Position].yPos==y[0])
+			if(xPos[Position]==x[0] && yPos[Position]==y[0])
 			{
                                 EatingAppleSound();
 				size++;
 				Score++;
 				locationOfNewApple();
 			}
-			g.drawImage(apple, Loc[Position].xPos, Loc[Position].yPos, this);		
+			g.drawImage(apple, xPos[Position], yPos[Position], this);		
 		}
 		for(int c=3;c<size;c++)
 		{
@@ -1032,7 +1128,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	}
 	public void GameOver(Graphics g2)
 	{
-                clipMainTheme.stop();
+                MainTheme(false);
 		SnakeDeathGameOver();
                 panel.setVisible(true);
 		back.setVisible(false);
@@ -1054,7 +1150,7 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 	{
 		Position=rand.nextInt(totalLoc);
 		for(int i=0;i<size;i++){
-			if(Loc[Position].xPos==x[i] && Loc[Position].xPos==y[i])
+			if(xPos[Position]==x[i] && yPos[Position]==y[i])
 			{
 				locationOfNewApple();
 			}
@@ -1067,24 +1163,25 @@ class SnakeWorkSpace extends JPanel implements ActionListener, KeyListener
 		try {
 		BufferedReader in;
 		if(Esy) {
-		in=new BufferedReader(new FileReader("HighScore.txt"));
-		s=in.readLine();
-		in.close();
+			in=new BufferedReader(new FileReader("HighScore.txt"));
+			s=in.readLine();
+			HighScore=Integer.parseInt(s);
+			in.close();
 		}
-		if(Mdum)
+		else if(Mdum)
 		{
 			in=new BufferedReader(new FileReader("MediumHighScore.txt"));
 			s=in.readLine();
+			HighScore=Integer.parseInt(s);
 			in.close();
 		}
-		if(Hrd)
+		else if(Hrd)
 		{
 			in=new BufferedReader(new FileReader("HardHighScore.txt"));
 			s=in.readLine();
+			HighScore=Integer.parseInt(s);
 			in.close();
 		}
-		
-		HighScore=Integer.parseInt(s);
 		if(Score>HighScore)
 			HighScore=Score;
 		s=Integer.toString(HighScore);
