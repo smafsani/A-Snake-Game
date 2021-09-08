@@ -2,6 +2,8 @@
 BUILD OUTPUT DESCRIPTION
 ========================
 
+WHEN JAR FILE IS RUNNING THERE MUST BE THE TXT FILES AND AUDIO FILES REQUIRE IN THE SAME DIRECTORY OR FOLDER WITH THE JAR FILE. OTHERWISE, JAR FILE WILL NEVER WORK. 
+
 When you build an Java application project that has a main class, the IDE
 automatically copies all of the JAR
 files on the projects classpath to your projects dist/lib folder. The IDE
